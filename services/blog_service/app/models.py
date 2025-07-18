@@ -16,6 +16,7 @@ class BlogArticle(SQLModel, table=True):
   #timezone.utc
   owner_id: int
   tags: Optional[str] = Field(default=None)
+  
 class ArticleCreate(SQLModel):
     title: str
     content: str

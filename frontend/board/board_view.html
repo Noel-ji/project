@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>게시물 상세</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>😡</text></svg>">
+    <style>
+        .post-view-container { 
+            background: #fff; 
+            border-radius: 12px; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1); 
+            margin-top: 2rem;
+            overflow: hidden;
+        }
+        
+        .post-header { 
+            padding: 1.5rem 2rem; 
+            border-bottom: 1px solid #e9ecef;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .post-header h1 { 
+            margin: 0 0 1rem 0; 
+            font-size: 2.5rem; 
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .post-meta-info { 
+            display: flex; 
+            align-items: center; 
+            gap: 2rem; 
+            color: rgba(255,255,255,0.9);
+            font-size: 1rem;
+        }
+        
+        .post-meta-info span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .post-meta-info strong {
+            color: white;
+            font-weight: 600;
+        }
+        
+        .post-body { 
+            padding: 3rem; 
+            font-size: 1.2rem; 
+            line-height: 1.8; 
+            white-space: pre-wrap; 
+            min-height: 200px;
+            color: #333;
+            background: #e2dddd;
+        }
+        
+        .post-actions { 
+            padding: 1.5rem 2rem; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-top: 1px solid #dee2e6;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #000000 0%, #070707 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+            color: white;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+            margin-left: 0.5rem;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+            background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        /* 로딩 및 에러 상태 스타일 */
+        .loading-state {
+            padding: 3rem;
+            text-align: center;
+            color: #667eea;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+        }
+        
+        .error-state {
+            padding: 3rem;
+            text-align: center;
+            color: #dc3545;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border-radius: 12px;
+            border: 1px solid #f1b0b7;
+        }
+        
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .post-header {
+                padding: 2rem 1.5rem;
+            }
+            
+            .post-header h1 {
+                font-size: 2rem;
+            }
+            
+            .post-meta-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            
+            .post-body {
+                padding: 2rem 1.5rem;
+                font-size: 1.1rem;
+            }
+            
+            .post-actions {
+                padding: 1.5rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .action-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        /* 메타 정보 아이콘 효과 */
+        .post-meta-info span::before {
+            content: '•';
+            color: rgba(255,255,255,0.6);
+            margin-right: 0.5rem;
+        }
+        
+        .post-meta-info span:first-child::before {
+            content: '👤';
+        }
+        
+        .post-meta-info span:nth-child(2)::before {
+            content: '📅';
+        }
+        
+        .post-meta-info span:nth-child(3)::before {
+            content: '👁️';
+        }
+    </style>
+</head>
+    
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/index.html" class="nav-brand">🧑‍💻 Noel J Project</a>
+            <div class="nav-links">
+                <a href="/board/board_list.html" class="nav-link">자유로운 SKILL 게시판</a>
+                <a href="/blog/blog_list.html" class="nav-link">SKILL SHOT</a>
+            </div>
+            <div id="auth-links" class="nav-auth"></div>
+        </div>
+    </nav>
+    <main class="container">
+        <div class="post-view-container" id="post-container">
+            <!-- JS가 여기에 내용을 채웁니다 -->
+        </div>
+    </main>
+
+    <script src="/assets/js/auth.js"></script>
+    <script>
+        const postId = new URLSearchParams(window.location.search).get('id');
+        const postContainer = document.getElementById('post-container');
+        const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+
+        async function fetchAndRenderPost(loggedInUser) {
+            postContainer.innerHTML = `<div style="padding: 2rem; text-align:center;">로딩 중...</div>`;
+            try {
+                const response = await fetch(`/api/board/posts/${postId}`);
+                if (!response.ok) throw new Error('게시물을 찾을 수 없습니다.');
+                
+                const data = await response.json();
+                const { post, author, views } = data;
+
+                const formattedDate = new Date(post.created_at).toLocaleDateString('ko-KR', dateOptions);
+
+                let actionButtons = '';
+                if (loggedInUser && loggedInUser.id === post.owner_id) {
+                    actionButtons = `
+                        <div>
+                            <a href="/board/board_post.html?id=${post.id}" class="btn btn-primary">수정</a>
+                            <button id="delete-btn" class="btn btn-danger" style="margin-left: 0.5rem;">삭제</button>
+                        </div>`;
+                }
+
+                postContainer.innerHTML = `
+                    <header class="post-header">
+                        <h1>${post.title}</h1>
+                        <div class="post-meta-info">
+                            <span>작성자: <strong>${author.username || 'Unknown'}</strong></span>
+                            <span>작성일: ${formattedDate}</span>
+                            <span>조회수: ${views}</span>
+                        </div>
+                    </header>
+                    <div class="post-body">${post.content}</div>
+                    <div class="post-actions">
+                        <a href="/board/board_list.html" class="btn btn-secondary">목록으로</a>
+                        ${actionButtons}
+                    </div>`;
+
+                if (document.getElementById('delete-btn')) {
+                    document.getElementById('delete-btn').onclick = async () => {
+                        if (confirm('정말로 이 글을 삭제하시겠습니까?')) {
+                            const delResponse = await fetch(`/api/board/posts/${postId}`, { method: 'DELETE', credentials: 'include' });
+                            if (delResponse.ok) {
+                                alert('삭제되었습니다.');
+                                window.location.href = '/board/board_list.html';
+                            } else {
+                                alert('삭제에 실패했습니다.');
+                            }
+                        }
+                    };
+                }
+            } catch (error) {
+                postContainer.innerHTML = `<div style="padding: 1.5rem;"><h3 style="color:red;">${error.message}</h3></div>`;
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = await getCurrentUser();
+            renderNavbar(user);
+            if (postId) {
+                fetchAndRenderPost(user);
+            } else {
+                postContainer.innerHTML = '<h1>게시물 ID가 없습니다.</h1>';
+            }
+        });
+    </script>
+</body>
+</html>

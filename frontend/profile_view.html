@@ -5,15 +5,16 @@
     <title>사용자 프로필</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
     <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>😡</text></svg>">
 </head>
 <body>
 <div class="w3-content">
     <nav class="navbar">
         <div class="container">
-            <a href="/index.html" class="nav-brand">🚀 MSA Project</a>
+            <a href="/index.html" class="nav-brand">🧑‍💻 Noel J Project</a>
             <div class="nav-links">
-                <a href="/board_list.html" class="nav-link">게시판</a>
-                <a href="/blog_list.html" class="nav-link">블로그</a>
+                <a href="/board/board_list.html" class="nav-link">자유로운 SKILL 게시판</a>
+                <a href="/blog/blog_list.html" class="nav-link">SKILL SHOT</a>
             </div>
             <div id="auth-links" class="nav-auth"></div>
         </div>
@@ -83,41 +84,50 @@
 
     // --- 작성한 글 목록 UI를 그리는 함수 ---
     async function renderUserPosts(userId) {
-        userPostsList.innerHTML = '<div class="w3-container"><p>작성한 글 로딩 중...</p></div>';
-        try {
-            const [boardRes, blogRes] = await Promise.all([
-                fetch(`/api/board/posts?owner_id=${userId}`),
-                fetch(`/api/blog/articles?owner_id=${userId}`)
-            ]);
-            const boardData = await boardRes.json();
-            const blogData = await blogRes.json();
-            
-            const allPosts = [
-                ...boardData.items.map(p => ({...p, type: 'board', type_ko: '게시판'})),
-                ...blogData.items.map(a => ({...a, type: 'blog', type_ko: '블로그'}))
-            ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    userPostsList.innerHTML = '<div class="w3-container"><p>작성한 글 로딩 중...</p></div>';
+    try {
+        // boardRes 제거, blogRes만 사용
+        const blogRes = await fetch(`/api/blog/articles?owner_id=${userId}`);
+        const blogData = await blogRes.json();
+        
+        const allPosts = blogData.items.map(a => ({
+            ...a,
+            type: 'blog',
+            type_ko: '블로그'
+        })).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-            userPostsList.innerHTML = '';
-            if (allPosts.length === 0) {
-                userPostsList.innerHTML = '<div class="w3-container"><p>작성한 글이 없습니다.</p></div>';
-                return;
-            }
-            allPosts.forEach(post => {
-                const link = `/${post.type}_detail.html?id=${post.id}`;
-                const formattedDate = new Date(post.created_at).toLocaleDateString('ko-KR', dateOptions);
-                userPostsList.innerHTML += `
-                    <div class="list-item">
-                        <div>
-                            <a href="${link}">${post.title}</a>
-                            <span class="w3-tag">${post.type_ko}</span>
-                        </div>
-                        <span class="post-meta">${formattedDate}</span>
-                    </div>`;
-            });
-        } catch (error) {
-            userPostsList.innerHTML = '<div class="w3-container" style="color:red;"><p>작성한 글을 불러오는 데 실패했습니다.</p></div>';
+        userPostsList.innerHTML = '';
+        if (allPosts.length === 0) {
+            userPostsList.innerHTML = '<div class="w3-container"><p>작성한 글이 없습니다.</p></div>';
+            return;
         }
+        allPosts.forEach(post => {
+            const link = `blog/blog_detail2.html?id=${post.id}`;
+            let formattedDate = 'Invalid Date';
+            // 날짜 옵션이 정의되어 있는지 확인
+            const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+            try {
+                const dateObj = new Date(post.created_at);
+                if (!isNaN(dateObj.getTime())) {
+                    formattedDate = dateObj.toLocaleDateString('ko-KR', dateOptions);
+                }
+            } catch (e) {
+                // 그대로 Invalid Date
+            }
+            userPostsList.innerHTML += `
+                <div class="list-item">
+                    <div>
+                        <a href="${link}">${post.title}</a>
+                        <span class="w3-tag">${post.type_ko}</span>
+                    </div>
+                    <span class="post-meta">${formattedDate}</span>
+                </div>`;
+});
+    } catch (error) {
+        userPostsList.innerHTML = '<div class="w3-container" style="color:red;"><p>작성한 글을 불러오는 데 실패했습니다.</p></div>';
     }
+}   
+    
 
     // ▼▼▼ 페이지가 로드될 때 실행되는 메인 로직 (수정됨) ▼▼▼
     document.addEventListener('DOMContentLoaded', async () => {

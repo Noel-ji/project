@@ -1,85 +1,172 @@
-from fastapi import FastAPI, Depends, HTTPException, status, Header
-from sqlmodel import SQLModel, Field, select, func
+import os
+import math
+import asyncio
+import time
+from typing import Annotated, List, Optional
+from fastapi import FastAPI, Depends, HTTPException, Header, Query, status, Response, Body
+from sqlmodel import select, func, SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
-from typing import Optional, Annotated, List
-from database import get_session, init_db
+import httpx
+import redis.asyncio as redis
 
-class BoardPost(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    title: str
-    content: str
-    owner_id: int
-    tags: Optional[str] = None
-
-class BoardPostCreate(SQLModel):
-    title: str
-    content: str
-    tags: Optional[str] = None
-
-class BoardPostUpdate(SQLModel):
-    title: Optional[str] = None
-    content: Optional[str] = None
-    tags: Optional[str] = None
+from database import init_db, get_session
+from redis_client import get_redis
+from models import Post, PostCreate, PostUpdate
 
 app = FastAPI(title="Board Service")
+
+USER_SERVICE_URL = os.getenv("USER_SERVICE_URL")
+
+class PaginatedResponse(SQLModel):
+    total: int
+    page: int
+    size: int
+    pages: int
+    items: List[dict] = []
 
 @app.on_event("startup")
 async def on_startup():
     await init_db()
-
-@app.get("/api/board/posts", response_model=List[BoardPost])
-async def list_posts(session: Annotated[AsyncSession, Depends(get_session)]):
-    result = await session.execute(select(BoardPost).order_by(BoardPost.id.desc()))
-    return result.scalars().all()
-
-@app.get("/api/board/posts/{post_id}", response_model=BoardPost)
-async def get_post(post_id: int, session: Annotated[AsyncSession, Depends(get_session)]):
-    post = await session.get(BoardPost, post_id)
-    if not post:
-        raise HTTPException(status_code=404, detail="Post not found")
-    return post
-
-@app.post("/api/board/posts", response_model=BoardPost, status_code=status.HTTP_201_CREATED)
+    
+@app.post("/api/board/posts", response_model=Post, status_code=status.HTTP_201_CREATED)
 async def create_post(
-    post_data: BoardPostCreate,
+    post_data: PostCreate,
     session: Annotated[AsyncSession, Depends(get_session)],
     x_user_id: Annotated[int, Header(alias="X-User-Id")],
 ):
-    new_post = BoardPost(**post_data.dict(), owner_id=x_user_id)
+    """새로운 게시글을 생성합니다."""
+    new_post = Post.model_validate(post_data, update={"owner_id": x_user_id})
     session.add(new_post)
     await session.commit()
     await session.refresh(new_post)
     return new_post
 
-@app.patch("/api/board/posts/{post_id}", response_model=BoardPost)
+@app.get("/api/board/posts", response_model=PaginatedResponse)
+async def list_posts(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    page: int = Query(1, ge=1),
+    size: int = Query(10, ge=1, le=100),
+    owner_id: Optional[int] = None,
+):
+    """게시글 목록을 페이지네이션하여 반환합니다."""
+    offset = (page - 1) * size
+    
+    # 필터링 조건에 따라 전체 개수와 목록 쿼리를 준비합니다.
+    count_query = select(func.count(Post.id))
+    posts_query = select(Post).order_by(Post.id.desc())
+
+    if owner_id:
+        count_query = count_query.where(Post.owner_id == owner_id)
+        posts_query = posts_query.where(Post.owner_id == owner_id)
+
+    # 전체 개수를 먼저 조회합니다.
+    total_result = await session.execute(count_query)
+    total = total_result.scalar_one()
+
+    # 현재 페이지에 해당하는 목록을 조회합니다.
+    paginated_query = posts_query.offset(offset).limit(size)
+    posts_result = await session.execute(paginated_query)
+    posts = posts_result.scalars().all()
+
+    # User Service에 작성자 정보를 한 번에 문의합니다.
+    author_ids = {p.owner_id for p in posts}
+    authors = {}
+    if author_ids:
+        try:
+            async with httpx.AsyncClient() as client:
+                tasks = [client.get(f"{USER_SERVICE_URL}/api/users/{uid}") for uid in author_ids]
+                results = await asyncio.gather(*tasks)
+                for resp in results:
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        authors[data['id']] = data.get('username', 'Unknown')
+        except Exception as e:
+            print(f"Error fetching authors: {e}")
+
+    # 최종 응답 데이터를 조립합니다.
+    items_with_details = []
+    for post in posts:
+        post_dict = post.model_dump(mode='json')
+        post_dict["author_username"] = authors.get(post.owner_id, "Unknown")
+        items_with_details.append(post_dict)
+        
+    return PaginatedResponse(
+        total=total, page=page, size=size,
+        pages=math.ceil(total / size), items=items_with_details
+    )
+
+@app.get("/api/board/posts/{post_id}")
+async def get_post(
+    post_id: int, 
+    session: Annotated[AsyncSession, Depends(get_session)],
+    redis: Annotated[redis.Redis, Depends(get_redis)],
+    #redis: Annotated[Redis, Depends(get_redis)],
+):
+    """특정 게시글의 상세 정보와 함께, Redis로 조회수를 1 올리고 동기화 작업을 등록합니다."""
+    # Redis에서 해당 게시물의 조회수를 1 증가시킵니다.
+    redis_key = f"views:post:{post_id}"
+    view_count = await redis.incr(redis_key)
+    
+    # ▼▼▼ 동기화 작업 등록 로직 추가 ▼▼▼
+    # 'view_sync_queue'라는 작업 큐에 post_id를 현재 시간 점수와 함께 추가합니다.
+    #await redis.zadd("view_sync_queue", {str(post_id): time.time()})
+    
+    post = await session.get(Post, post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    author_info = {}
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(f"{USER_SERVICE_URL}/api/users/{post.owner_id}")
+            if resp.status_code == 200:
+                author_info = resp.json()
+    except Exception:
+        author_info = {"username": "Unknown"}
+
+    return {"post": post.model_dump(mode='json'), "author": author_info, "views": view_count}
+
+@app.patch("/api/board/posts/{post_id}", response_model=Post)
 async def update_post(
     post_id: int,
-    post_data: BoardPostUpdate,
+    post_data: PostUpdate,
     session: Annotated[AsyncSession, Depends(get_session)],
     x_user_id: Annotated[int, Header(alias="X-User-Id")],
 ):
-    post = await session.get(BoardPost, post_id)
-    if not post:
+    """게시글의 제목과 내용을 수정합니다."""
+    db_post = await session.get(Post, post_id)
+    if not db_post:
         raise HTTPException(status_code=404, detail="Post not found")
-    if post.owner_id != x_user_id:
+    if db_post.owner_id != x_user_id:
         raise HTTPException(status_code=403, detail="Not authorized")
-    for field, value in post_data.dict(exclude_unset=True).items():
-        setattr(post, field, value)
+
+    update_data = post_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_post, key, value)
+    
     await session.commit()
-    await session.refresh(post)
-    return post
+    await session.refresh(db_post)
+    return db_post
 
 @app.delete("/api/board/posts/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_post(
     post_id: int,
     session: Annotated[AsyncSession, Depends(get_session)],
+    redis: Annotated[redis.Redis, Depends(get_redis)],
     x_user_id: Annotated[int, Header(alias="X-User-Id")],
 ):
-    post = await session.get(BoardPost, post_id)
-    if not post:
+    """게시글을 삭제합니다."""
+    db_post = await session.get(Post, post_id)
+    if not db_post:
         raise HTTPException(status_code=404, detail="Post not found")
-    if post.owner_id != x_user_id:
+    if db_post.owner_id != x_user_id:
         raise HTTPException(status_code=403, detail="Not authorized")
-    await session.delete(post)
+
+    await session.delete(db_post)
+    
+    view_count_key = f"views:post:{post_id}"
+    await redis.delete(view_count_key)
+    await redis.zrem("view_sync_queue", str(post_id))
+    
     await session.commit()
-    return
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

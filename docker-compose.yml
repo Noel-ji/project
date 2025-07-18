@@ -28,6 +28,8 @@ services:
         condition: service_started
       blog_service:
         condition: service_started
+      board_service:
+        condition: service_started
     networks:
       - webnet
 
@@ -43,7 +45,7 @@ services:
       user_db:
         condition: service_healthy
       redis_db:
-        condition: service_started
+        condition: service_healthy
     networks:
       - webnet
   blog_service:
@@ -59,39 +61,46 @@ services:
         condition: service_healthy
     networks:
       - webnet
+  
   board_service:
     build: ./services/board_service
     volumes:
       - ./services/board_service/app:/app
     environment:
-      - DATABASE_URL=mysql+asyncmy://msa_user:1234567890@board_db:3306/board_db
+      - DATABASE_URL=mysql+asyncmy://${DB_USER}:${DB_PASSWORD}@board_db:3306/board_db
+      - USER_SERVICE_URL=http://user_service:8001
+      - REDIS_URL=${REDIS_URL}
     depends_on:
       board_db:
         condition: service_healthy
-    ports:
-      - 8003:8003
-    networks:
-      - webnet
-
-  board_db:
-    image: mysql:8.0
-    ports:
-      - "33063:3306"
-    restart: always
-    command: --default-authentication-plugin=mysql_native_password
-    environment:
-      - MYSQL_ROOT_PASSWORD=${USER_DB_ROOT_PASSWORD}
-      - MYSQL_DATABASE=board_db
-      - MYSQL_USER=${DB_USER}
-      - MYSQL_PASSWORD=${DB_PASSWORD}
+      redis_db:
+        condition: service_healthy
+    restart: on-failure
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping","-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
       - webnet
 
+  board_worker:
+    build: ./services/board_service # board_service와 동일한 환경을 사용
+    volumes:
+      - ./services/board_service/app:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DATABASE_URL=mysql+asyncmy://${DB_USER}:${DB_PASSWORD}@board_db:3306/board_db
+      - REDIS_URL=${REDIS_URL}
+    # Uvicorn 대신 worker.py를 실행하도록 명령어 변경
+    command: ["python", "worker.py"]
+    depends_on:
+      board_db:
+        condition: service_healthy
+      redis_db:
+        condition: service_healthy
+    networks:
+      - webnet
   user_db:
     image: mysql:8.0
     ports:
@@ -129,9 +138,33 @@ services:
       retries: 5
     networks:
       - webnet
+
+  board_db:
+    image: mysql:8.0
+    ports:
+      - "33063:3306"
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_ROOT_PASSWORD=${USER_DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=board_db
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping","-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - webnet
   
   redis_db:
     image: redis:alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - webnet
 

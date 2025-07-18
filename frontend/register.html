@@ -4,57 +4,178 @@
     <meta charset="UTF-8">
     <title>회원가입</title>
     <link rel="stylesheet" href="/assets/css/style.css">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>😡</text></svg>">
+    
+<style>
+        .register-layout {
+            display: flex;
+            min-height: calc(100vh - 80px); /* 네비바 높이 제외 */
+            align-items: center;
+            gap: 2rem;
+        }
+        
+        .left-section {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .left-content {
+            text-align: center;
+            color: white;
+        }
+        
+        .left-content img {
+            max-width: 400px;
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        
+        .left-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+        
+        .left-content p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .right-section {
+            flex: 1;
+            padding: 2rem;
+        }
+        
+        .form-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #430288;
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .form-container h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #0cff77;
+            font-size: 2rem;
+        }
+        
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .register-layout {
+                flex-direction: column;
+                min-height: auto;
+            }
+            
+            .left-section {
+                padding: 2rem 1rem;
+            }
+            
+            .left-content h2 {
+                font-size: 2rem;
+            }
+            
+            .left-content p {
+                font-size: 1rem;
+            }
+            
+            .form-container {
+                padding: 2rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
-            <a href="/index.html" class="nav-brand">🚀 MSA Project</a>
+            <a href="/index.html" class="nav-brand">🧑‍💻 Noel J Project</a>
             <div class="nav-links">
-                <a href="/board_list.html" class="nav-link">게시판</a>
-                <a href="/blog_list.html" class="nav-link">블로그</a>
+                <a href="/board/board_list.html" class="nav-link">자유로운 SKILL 게시판</a>
+                <a href="/blog/blog_list.html" class="nav-link">SKILL SHOT</a>
             </div>
             <div id="auth-links" class="nav-auth"></div>
         </div>
     </nav>
+    
     <main class="container">
-        <div class="form-container">
-            <h1>회원가입</h1>
-            <form id="register-form">
-                <p id="error-message" style="color:red; text-align: center;"></p>
-                <div>
-                    <label for="username">사용자 이름:</label>
-                    <input type="text" id="username" name="username" required>
+        <div class="register-layout">
+            <!-- 왼쪽 섹션 - 이미지 및 설명 -->
+            <div class="left-section">
+                <div class="left-content">
+                    <!-- 여기에 원하시는 이미지를 넣으세요 -->
+                    <img src="/assets/images/welcome-image.jpg" alt="환영 이미지" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="display:none; font-size: 5rem; margin-bottom: 2rem;">🚀</div>
+                    
+                    <h2>함께 성장해요!</h2>
+                    <p>
+                        개발자들의 지식 공유 플랫폼에 오신 것을 환영합니다.<br>
+                        자유로운 게시판과 기술 블로그를 통해<br>
+                        여러분의 경험을 나누고 함께 발전해보세요.
+                    </p>
                 </div>
-                <div>
-                    <label for="email">이메일 (로그인 ID):</label>
-                    <input type="email" id="email" name="email" required>
+            </div>
+            
+            <!-- 오른쪽 섹션 - 회원가입 폼 -->
+            <div class="right-section">
+                <div class="form-container">
+                    <h1>회원가입</h1>
+                    <form id="register-form">
+                        <p id="error-message" style="color:red; text-align: center;"></p>
+                        
+                        <div>
+                            <label for="username">사용자 이름:</label>
+                            <input type="text" id="username" name="username" required>
+                        </div>
+                        
+                        <div>
+                            <label for="email">이메일 (로그인 ID):</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        
+                        <div>
+                            <label for="password">비밀번호:</label>
+                            <input type="password" id="password" name="password" required>
+                        </div>
+                        
+                        <div>
+                            <label for="password_confirm">비밀번호 확인:</label>
+                            <input type="password" id="password_confirm" name="password_confirm" required>
+                        </div>
+                        
+                        <div>
+                            <label for="bio">자기소개 (선택사항):</label>
+                            <textarea id="bio" name="bio" rows="3"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label for="profile_image">프로필 사진 (선택사항):</label>
+                            <input type="file" id="profile_image" name="profile_image" accept="image/*">
+                        </div>
+                        
+                        <button type="submit" id="submit-btn">가입하기</button>
+                        
+                        <p style="text-align: center; margin-top: 1rem; font-size: 0.9em;">
+                            이미 계정이 있으신가요? <a href="/login.html">로그인</a>
+                        </p>
+                    </form>
                 </div>
-                <div>
-                    <label for="password">비밀번호:</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <div>
-                    <label for="password_confirm">비밀번호 확인:</label>
-                    <input type="password" id="password_confirm" name="password_confirm" required>
-                </div>
-                <div>
-                    <label for="bio">자기소개 (선택사항):</label>
-                    <textarea id="bio" name="bio" rows="3"></textarea>
-                </div>
-                <div>
-                    <label for="profile_image">프로필 사진 (선택사항):</label>
-                    <input type="file" id="profile_image" name="profile_image" accept="image/*">
-                </div>
-                <button type="submit" id="submit-btn">가입하기</button>
-                <p style="text-align: center; margin-top: 1rem; font-size: 0.9em;">
-                    이미 계정이 있으신가요? <a href="/login.html">로그인</a>
-                </p>
-            </form>
+            </div>
         </div>
     </main>
+
     <script>
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -84,7 +205,7 @@
                 password: password,
                 bio: formData.get('bio')
             };
-            console.log(textData);
+            
             try {
                 // 3. 텍스트 데이터로 회원가입 및 자동 로그인 요청
                 const registerResponse = await fetch('/api/auth/register', {
@@ -107,7 +228,7 @@
                     const imageResponse = await fetch('/api/users/me/upload-image', {
                         method: 'POST',
                         body: imageFormData,
-                        credentials: 'include' // 자동 로그인된 세션 쿠키를 보내기 위해 필수
+                        credentials: 'include'
                     });
 
                     if (!imageResponse.ok) {

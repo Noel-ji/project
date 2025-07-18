@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>BOARD New/Edit</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>😡</text></svg>">
+    <style>
+        /* 전체 배경 및 기본 색상 */
+        body {
+            background: #181824 !important;
+            color: #b388ff !important;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* 컨테이너 중앙 정렬 및 크기 조절 */
+        .form-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #232336;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(179, 136, 255, 0.2);
+            border: 1px solid #3a3a4d;
+        }
+        
+        /* 제목 스타일 */
+        #form-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #b388ff !important;
+            margin-bottom: 2rem;
+            text-shadow: 0 2px 4px rgba(179, 136, 255, 0.3);
+        }
+        
+        /* 폼 스타일 */
+        #post-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        /* 라벨 스타일 */
+        label {
+            color: #b388ff !important;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+            font-size: 1.1rem;
+        }
+        
+        /* 입력 필드 스타일 */
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #3a3a4d;
+            border-radius: 8px;
+            background: #1a1a1a;
+            color: #b388ff !important;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #b388ff;
+            box-shadow: 0 0 10px rgba(179, 136, 255, 0.3);
+            background: #232336;
+        }
+        
+        /* 플레이스홀더 색상 */
+        input::placeholder, textarea::placeholder {
+            color: #6a6a7d;
+        }
+        
+        /* 텍스트 영역 특별 스타일 */
+        textarea {
+            min-height: 300px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+        
+        /* 버튼 스타일 */
+        #submit-btn {
+            background: linear-gradient(135deg, #b388ff 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        #submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(179, 136, 255, 0.4);
+            background: linear-gradient(135deg, #7c3aed 0%, #b388ff 100%);
+        }
+        
+        #submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* 에러 메시지 스타일 */
+        #error-message {
+            color: #ff6b6b !important;
+            background: rgba(255, 107, 107, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #ff6b6b;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        #error-message:not(:empty) {
+            display: block;
+        }
+        
+        /* 네비게이션 바 수정 */
+        .navbar {
+            background: #232336 !important;
+            border-bottom: 1px solid #3a3a4d;
+        }
+        
+        .nav-brand, .nav-link {
+            color: #b388ff !important;
+        }
+        
+        .nav-brand:hover, .nav-link:hover {
+            color: white !important;
+        }
+        
+        /* 폼 그룹 스타일 */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .form-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+            
+            #form-title {
+                font-size: 2rem;
+            }
+            
+            input[type="text"], textarea {
+                padding: 0.8rem;
+            }
+            
+            #submit-btn {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
+        
+        /* 로딩 애니메이션 */
+        .loading {
+            position: relative;
+        }
+        
+        .loading::after {
+            content: '';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid #b388ff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: translateY(-50%) rotate(0deg); }
+            100% { transform: translateY(-50%) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/index.html" class="nav-brand">🧑‍💻 Noel J Project</a>
+            <div class="nav-links">
+                <a href="/board/board_list.html" class="nav-link">자유로운 SKILL 게시판</a>
+                <a href="/blog/blog_list.html" class="nav-link">SKILL SHOT</a>
+            </div>
+            <div id="auth-links" class="nav-auth"></div>
+        </div>
+    </nav>
+    
+    <main>
+        <div class="form-container">
+            <h1 id="form-title">New board</h1>
+            <form id="post-form">
+                <p id="error-message"></p>
+                
+                <div class="form-group">
+                    <label for="title">📝 제목</label>
+                    <input type="text" id="title" name="title" placeholder="게시글 제목을 입력해주세요..." required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="content">📄 내용</label>
+                    <textarea id="content" name="content" placeholder="내용을 입력해주세요..." rows="15" required></textarea>
+                </div>
+                
+                <button type="submit" id="submit-btn">💾 SAVED</button>
+            </form>
+        </div>
+    </main>
+
+    <script src="/assets/js/auth.js"></script>
+    <script>
+        const postId = new URLSearchParams(window.location.search).get('id');
+        const isEditMode = !!postId;
+
+        const form = document.getElementById('post-form');
+        const titleInput = document.getElementById('title');
+        const contentInput = document.getElementById('content');
+        const formTitle = document.getElementById('form-title');
+        const errorEl = document.getElementById('error-message');
+
+        async function initializeForm() {
+            const user = await getCurrentUser();
+            renderNavbar(user);
+
+            if(!user) {
+                alert('로그인이 필요합니다.');
+                window.location.href = '/login.html';
+                return; 
+            }
+
+            formTitle.innerText = isEditMode ? '📝 게시글 수정' : '✨ 새 게시글 작성';
+
+            if (isEditMode) {
+                try {
+                    // 수정 모드: 기존 데이터 불러오기
+                    const res = await fetch(`/api/board/posts/${postId}`, {
+                        credentials: 'include'
+                    });
+                    
+                    if (!res.ok) throw new Error('게시글을 불러오는 데 실패했습니다.');
+
+                    const data = await res.json();
+                    const post = data.post;
+
+                    if (user.id !== post.owner_id) {
+                        alert('이 게시글을 수정할 권한이 없습니다.');
+                        window.history.back();                  
+                        return;
+                    } 
+                    
+                    titleInput.value = post.title;
+                    contentInput.value = post.content;
+                    
+                } catch (error) {
+                    errorEl.innerText = error.message;
+                }
+            }
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorEl.innerText = '';
+            
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerText = '💾 저장 중...';
+            submitBtn.classList.add('loading');
+
+            const url = isEditMode ? `/api/board/posts/${postId}` : '/api/board/posts';
+            const method = isEditMode ? 'PATCH' : 'POST';
+
+            const postData = {
+                title: titleInput.value,
+                content: contentInput.value,
+            };
+            
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(postData),
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || '게시글 저장에 실패했습니다.');
+                }
+                
+                const savedPost = await response.json();
+                const newPostId = savedPost.id;
+
+                alert('✅ 게시글이 성공적으로 저장되었습니다.');
+                window.location.href = `/board/board_view.html?id=${newPostId}`;
+            
+            } catch (error) {
+                errorEl.innerText = '❌ ' + error.message;
+            
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = isEditMode ? '💾 수정 완료' : '💾 작성 완료';
+                submitBtn.classList.remove('loading');
+            }
+        });
+            
+        document.addEventListener('DOMContentLoaded', initializeForm);
+    </script>
+</body>
+</html>

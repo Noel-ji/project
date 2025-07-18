@@ -60,9 +60,12 @@ async def upload_article_images(
     if db_article.owner_id != x_user_id:
         raise HTTPException(status_code=403, detail="Not authorized")
 
+    allowed_exts = {".jpg", ".jpeg", ".png", ".gif"}
     saved_filenames = []
     for file in files:
-        file_extension = os.path.splitext(file.filename)[1]
+        file_extension = os.path.splitext(file.filename)[1].lower()
+        if file_extension not in allowed_exts:
+            raise HTTPException(status_code=400, detail="이미지 파일은 jpg, jpeg, png, gif만 허용됩니다.")
         unique_filename = f"{uuid.uuid4()}{file_extension}"
         file_path = os.path.join(IMAGE_DIR, unique_filename)
 
@@ -166,17 +169,70 @@ async def list_articles(
         pages=math.ceil(total / size), items=items_with_details
     )
     
+@app.patch("/api/blog/articles/{article_id}", response_model=BlogArticle)
+async def update_article(
+    article_id: int,
+    article_data: ArticleUpdate,
+    session: Annotated[AsyncSession, Depends(get_session)],
+    x_user_id: Annotated[int, Header(alias="X-User-Id")],
+):
+    db_article = await session.get(BlogArticle, article_id)
+    if not db_article:
+        raise HTTPException(status_code=404, detail="Article not found")
+    if db_article.owner_id != x_user_id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    update_data = article_data.model_dump(exclude_unset=True)
+    
+    for key, value in update_data.items():
+        setattr(db_article, key, value)
+        
+    session.add(db_article)
+    await session.commit()
+    await session.refresh(db_article)
+    return db_article
+    
 @app.delete("/api/blog/articles/{article_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_article(
     article_id: int,
     session: Annotated[AsyncSession, Depends(get_session)],
     x_user_id: Annotated[int, Header(alias="X-User-Id")],
 ):
-    article = await session.get(BlogArticle, article_id)
-    if not article:
+    db_article = await session.get(BlogArticle, article_id)
+    if not db_article:
         raise HTTPException(status_code=404, detail="Article not found")
-    if article.owner_id != x_user_id:
+    if db_article.owner_id != x_user_id:
         raise HTTPException(status_code=403, detail="Not authorized")
-    await session.delete(article)
+    
+    image_query = select(ArticleImage).where(ArticleImage.article_id == article_id)
+    image_to_delete = (await session.exec(image_query)).all()
+    for image in image_to_delete:
+        file_path = os.path.join(IMAGE_DIR, image.image_filename)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        await session.delete(image)
+    await session.delete(db_article)
     await session.commit()
     return
+
+@app.get("/api/blog/tags", response_model=List[str])
+async def get_all_tags(session: Annotated[AsyncSession, Depends(get_session)]):
+    """모든 게시물의 태그를 수집하여 중복없이 반환합니다."""
+    query = select(BlogArticle.tags).where(BlogArticle.tags != None)
+    result = await session.exec(query)
+    all_tags: set[str] = set()
+    for tags_str in result.all():
+        if tags_str:
+            tags = [tag.strip() for tag in tags_str.split(",") if tag.strip()]
+            all_tags.update(tags)
+    return sorted(list(all_tags))
+
+@app.get("/api/blog/popular-articles", response_model=List[BlogArticle])
+async def get_popular_articles(
+    session: Annotated[AsyncSession, Depends(get_session)],
+    ):
+    """조회수가 가장 높은 게시글을 반환합니다."""
+    query = select(BlogArticle).order_by(BlogArticle.id.desc()).limit(4)
+    result = await session.exec(query)
+    popular_articles = result.all()
+    return popular_articles

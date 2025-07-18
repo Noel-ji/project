@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>NEW POST</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>😡</text></svg>">
+    <style>
+        /* 전체 배경 및 기본 색상 */
+        body {
+            background: #181824 !important;
+            color: #b388ff !important;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* 컨테이너 중앙 정렬 및 크기 조절 */
+        .form-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2.5rem;
+            background: #232336;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(179, 136, 255, 0.2);
+            border: 1px solid #3a3a4d;
+        }
+        
+        /* 제목 스타일 */
+        #form-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #b388ff !important;
+            margin-bottom: 2rem;
+            text-shadow: 0 2px 4px rgba(179, 136, 255, 0.3);
+        }
+        
+        /* 폼 스타일 */
+        #post-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        /* 라벨 스타일 */
+        label {
+            color: #b388ff !important;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+            font-size: 1.1rem;
+        }
+        
+        /* 입력 필드 스타일 */
+        input[type="text"], textarea, input[type="file"] {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #3a3a4d;
+            border-radius: 8px;
+            background: #1a1a1a;
+            color: #b388ff !important;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        input[type="text"]:focus, textarea:focus, input[type="file"]:focus {
+            outline: none;
+            border-color: #b388ff;
+            box-shadow: 0 0 10px rgba(179, 136, 255, 0.3);
+            background: #232336;
+        }
+        
+        /* 파일 입력 특별 스타일 */
+        input[type="file"] {
+            padding: 0.8rem;
+            cursor: pointer;
+        }
+        
+        input[type="file"]::-webkit-file-upload-button {
+            background: linear-gradient(135deg, #b388ff 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 1rem;
+            font-weight: 600;
+        }
+        
+        input[type="file"]::-webkit-file-upload-button:hover {
+            background: linear-gradient(135deg, #7c3aed 0%, #b388ff 100%);
+        }
+        
+        /* 플레이스홀더 색상 */
+        input::placeholder, textarea::placeholder {
+            color: #6a6a7d;
+        }
+        
+        /* 텍스트 영역 특별 스타일 */
+        textarea {
+            min-height: 300px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+        
+        /* 버튼 스타일 */
+        #submit-btn {
+            background: linear-gradient(135deg, #b388ff 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 1.2rem 2rem;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+        }
+        
+        #submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(179, 136, 255, 0.4);
+            background: linear-gradient(135deg, #7c3aed 0%, #b388ff 100%);
+        }
+        
+        #submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* 에러 메시지 스타일 */
+        #error-message {
+            color: #ff6b6b !important;
+            background: rgba(255, 107, 107, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #ff6b6b;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        #error-message:not(:empty) {
+            display: block;
+        }
+        
+        /* 네비게이션 바 수정 */
+        .navbar {
+            background: #232336 !important;
+            border-bottom: 1px solid #3a3a4d;
+        }
+        
+        .nav-brand, .nav-link {
+            color: #b388ff !important;
+        }
+        
+        .nav-brand:hover, .nav-link:hover {
+            color: white !important;
+        }
+        
+        /* 폼 그룹 스타일 */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 태그 입력 특별 스타일 */
+        #tags {
+            position: relative;
+        }
+        
+        .tag-hint {
+            font-size: 0.9rem;
+            color: #6a6a7d;
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+        
+        /* 이미지 미리보기 컨테이너 */
+        .image-preview {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .image-preview img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #3a3a4d;
+        }
+        
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .form-container {
+                margin: 1rem;
+                padding: 1.5rem;
+            }
+            
+            #form-title {
+                font-size: 2rem;
+            }
+            
+            input[type="text"], textarea, input[type="file"] {
+                padding: 0.8rem;
+            }
+            
+            #submit-btn {
+                padding: 1rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
+        
+        /* 로딩 애니메이션 */
+        .loading {
+            position: relative;
+        }
+        
+        .loading::after {
+            content: '';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: translateY(-50%) rotate(0deg); }
+            100% { transform: translateY(-50%) rotate(360deg); }
+        }
+        
+        /* 성공 메시지 */
+        .success-message {
+            color: #4ade80 !important;
+            background: rgba(74, 222, 128, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #4ade80;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .success-message:not(:empty) {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="/index.html" class="nav-brand">🧑‍💻 Noel J Project</a>
+            <div class="nav-links">
+                <a href="/board/board_list.html" class="nav-link">자유로운 SKILL 게시판</a>
+                <a href="/blog/blog_list.html" class="nav-link">SKILL SHOT</a>
+            </div>
+            <div id="auth-links" class="nav-auth"></div>
+        </div>
+    </nav>
+    
+    <main class="container">
+        <div class="form-container">
+            <h1 id="form-title">✨ New post start</h1>
+            <form id="post-form">
+                <p id="error-message"></p>
+                <p id="success-message" class="success-message"></p>
+                
+                <div class="form-group">
+                    <label for="title">📝 제목</label>
+                    <input type="text" id="title" name="title" placeholder="멋진 제목을 입력해주세요..." required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="content">📄 내용</label>
+                    <textarea id="content" name="content" rows="15" placeholder="여기에 당신의 이야기를 들려주세요..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tags">🏷️ 태그 (쉼표로 구분)</label>
+                    <input type="text" id="tags" name="tags" placeholder="예: JavaScript, React, 개발팁">
+                    <div class="tag-hint">💡 태그는 쉼표(,)로 구분해서 입력해주세요</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="image">🖼️ 이미지 (여러 개 선택 가능)</label>
+                    <input type="file" id="image" name="image" accept="image/*" multiple>
+                    <div id="image-preview" class="image-preview"></div>
+                </div>
+                
+                <button type="submit" id="submit-btn">💾 SAVE POST</button>
+            </form>
+        </div>
+    </main>
+    
+    <script src="/assets/js/auth.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const postType = params.get('type') || 'Blog';
+        const postId = params.get('id');
+        const isEditMode = !!postId;
+
+        const form = document.getElementById('post-form');
+        const titleInput = document.getElementById('title');
+        const contentInput = document.getElementById('content');
+        const tagsInput = document.getElementById('tags');
+        const imageInput = document.getElementById('image');
+        const formTitle = document.getElementById('form-title');
+        const errorEl = document.getElementById('error-message');
+        const successEl = document.getElementById('success-message');
+        const imagePreview = document.getElementById('image-preview');
+
+        // 이미지 미리보기 기능
+        imageInput.addEventListener('change', function(e) {
+            imagePreview.innerHTML = '';
+            const files = e.target.files;
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.title = file.name;
+                    imagePreview.appendChild(img);
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+
+        async function initializeForm() {
+            const user = await getCurrentUser();
+            renderNavbar(user);
+
+            if (!user) {
+                alert('글을 작성하려면 로그인이 필요합니다.');
+                window.location.href = '/login.html';
+                return;
+            }
+
+            const resourceName = (postType === 'board') ? 'posts' : 'articles';
+            const icon = isEditMode ? '✏️' : '✨';
+            const action = isEditMode ? 'Edit' : '작성';
+            formTitle.innerHTML = `${icon} ${postType} post ${action}`;
+            
+            if (isEditMode) {
+                try {
+                    const response = await fetch(`/api/${postType}/${resourceName}/${postId}`, {
+                        credentials: 'include'
+                    });
+                    if (!response.ok) throw new Error('게시글 정보를 불러오는데 실패했습니다.');
+                    
+                    const data = await response.json();
+                    const post = data.post || data.article;
+
+                    if (user.id !== post.owner_id) {
+                         alert('수정 권한이 없습니다.');
+                         window.history.back();
+                         return;
+                    }
+
+                    titleInput.value = post.title;
+                    contentInput.value = post.content;
+                    if(tagsInput) tagsInput.value = post.tags || '';
+
+                } catch(error) {
+                    errorEl.innerText = '❌ ' + error.message;
+                }
+            }
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorEl.innerText = '';
+            successEl.innerText = '';
+            
+            const submitBtn = document.getElementById('submit-btn');
+            const originalText = submitBtn.innerText;
+            
+            submitBtn.disabled = true;
+            submitBtn.innerText = '💾 저장 중...';
+            submitBtn.classList.add('loading');
+
+            const resourceName = (postType === 'board') ? 'posts' : 'articles';
+            const url = isEditMode ? `/api/${postType}/${resourceName}/${postId}` : `/api/${postType}/${resourceName}`;
+            const method = isEditMode ? 'PATCH' : 'POST';
+
+            const textData = {
+                title: titleInput.value,
+                content: contentInput.value,
+                tags: tagsInput.value,
+            };
+
+            try {
+                const textResponse = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(textData),
+                    credentials: 'include'
+                });
+                
+                if (!textResponse.ok) {
+                    let errorMsg = '게시글 저장에 실패했습니다.';
+                    const contentType = textResponse.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const errorData = await textResponse.json();
+                        errorMsg = errorData.detail || errorMsg;
+                    } else {
+                        const errorText = await textResponse.text();
+                        if (errorText) errorMsg = errorText;
+                    }
+                    throw new Error(errorMsg);
+                }
+                
+                const savedPost = await textResponse.json();
+                const newPostId = savedPost.id;
+                
+                // 이미지 업로드 처리
+                const imageFiles = imageInput.files;
+                if (imageFiles.length > 0) {
+                    submitBtn.innerText = '🖼️ 이미지 업로드 중...';
+                    
+                    const formData = new FormData();
+                    for (const file of imageFiles) {
+                        formData.append("files", file);
+                    }
+                      
+                    const imageUploadUrl = `/api/${postType}/${resourceName}/${newPostId}/upload-images`;
+                    const imageResponse = await fetch(imageUploadUrl, {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'include'
+                    });
+                    
+                    if (!imageResponse.ok) {
+                        console.warn('이미지 업로드 실패');
+                        successEl.innerText = '✅ 글이 저장되었지만 일부 이미지 업로드에 실패했습니다.';
+                    }
+                }
+                
+                successEl.innerText = '✅ 성공적으로 저장되었습니다!';
+                
+                // 페이지 이동 전 잠시 대기
+                setTimeout(() => {
+                    const detailPage = (postType === 'board') ? '/board/board_view.html' : '/blog/blog_detail2.html';
+                    window.location.href = `${detailPage}?id=${newPostId}`;
+                }, 1500);
+
+            } catch (error) {
+                errorEl.innerText = '❌ ' + error.message;
+                
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalText;
+                submitBtn.classList.remove('loading');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', initializeForm);
+    </script>
+</body>
+</html>

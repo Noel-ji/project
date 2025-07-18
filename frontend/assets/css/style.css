@@ -4,12 +4,30 @@
 body, h1, h2, h3, h4, h5, h6 {
     font-family: "Raleway", "Malgun Gothic", "맑은 고딕", sans-serif;
 }
+body h1, body h2, body h3, body h4, body h5, body h6 {
+    color: #b388ff !important;
+}
 body {
-    background-color: #181824;
-    color: #e0e0e0;
+    background-color: #181824 !important;
+    color: #b388ff !important;
     margin: 0;
 }
+.w3-content h1,
+.w3-content h2, 
+.w3-content h3,
+.w3-content h4,
+.w3-content p,
+.w3-content div {
+    color: #b388ff !important;
+}
 
+.container h1,
+.container h2,
+.container h3,
+.container h4,
+.container p {
+    color: #b388ff !important;
+}
 /* 레이아웃 */
 .w3-content {
     max-width: 1400px;
@@ -42,8 +60,8 @@ body {
     border-radius: 8px;
 }
 .w3-white {
-    color: #e0e0e0 !important;
-    background-color: #232336 !important;
+    color: #e0e0e0 ;
+    background-color: #232336;
 }
 .w3-container {
     padding: 0.01em 16px;
@@ -86,14 +104,14 @@ body {
     transition: background 0.2s;
 }
 .w3-border {
-    border: 1px solid #b388ff !important;
+    border: 1px solid #b388ff ;
 }
 .w3-button:hover {
     background-color: #a259f7;
 }
 
 /* 헤더 & 네비게이션 */
-.w3-center { text-align: center !important; }
+.w3-center { text-align: center; }
 .navbar {
     background-color: #232336;
     border-bottom: 1px solid #3a3a4d;
@@ -109,17 +127,37 @@ body {
     justify-content: space-between;
     align-items: center;
 }
-.nav-brand { font-weight: bold; font-size: 1.25rem; color: #b388ff; text-decoration: none; }
+.nav-brand { 
+    font-weight: bold; 
+    font-size: 1.25rem; 
+    color: #b388ff; 
+    text-decoration: none; 
+}
+
 .nav-links a, .nav-auth a, .nav-auth span, .nav-auth button {
-    color: #e0e0e0;
+    color: #b388ff;
     text-decoration: none;
     padding: 0.5rem;
     margin-left: 0.5rem;
     vertical-align: middle;
     font-size: 0.95rem;
+    transition: color 0.3s ease;
+    border-radius: 4px;
 }
-.nav-auth{padding-right: 30px;}
-.nav-links a:hover, .nav-auth a:hover { color: #b388ff; }
+
+.nav-auth{padding-right: 30px;
+}
+.nav-brand:hover,
+.nav-links a:hover, 
+.nav-auth a:hover { color: white !important; 
+}
+.nav-brand:active,
+.nav-links a:active,
+.nav-auth a:active {
+    color: white !important;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
 .nav-auth button {
     background: #7c3aed;
     color: white;
@@ -127,8 +165,17 @@ body {
     border-radius: 4px;
     cursor: pointer;
     padding: 0.5rem 0.75rem;
+    transition: all 0.3s ease;
 }
-.nav-auth button:hover { background: #a259f7; }
+.nav-auth button:hover {
+    background: #a259f7;
+    color: white;
+
+}
+.nav-auth button:active {
+    background: #6d28d9;
+    color: white;
+}
 
 /* 폼 스타일 */
 .form-container {

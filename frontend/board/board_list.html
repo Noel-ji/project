@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>게시판</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' 
+    viewBox='0 0 100 100'><text y='.9em' font-size='90'>😡</text></svg>">
+    <style>
+        /* 전체 배경을 블랙으로 설정 */
+        body {
+            background: #000000 !important;
+            color: #ffffff;
+        }
+        
+        .container {
+            background: transparent;
+        }
+        
+        /* 게시판 컨테이너 스타일 - 블랙 테마 */
+        .board-container {
+            background: #1a1a1a;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(255,255,255,0.1);
+            overflow: hidden;
+            margin-top: 2rem;
+            border: 1px solid #333;
+        }
+        
+        /* 게시판 헤더 스타일 - 다크 그라데이션 */
+        .board-header {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            color: white;
+            padding: 2rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #4a5568;
+        }
+        
+        .board-header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            color: #e2e8f0;
+        }
+        
+        /* 게시물 리스트 아이템 스타일 - 블랙 테마 */
+        .post-list-item {
+            padding: 1.5rem 3rem;
+            border-bottom: 1px solid #2d3748;
+            transition: all 0.3s ease;
+            background: #1a1a1a;
+        }
+        
+        .post-list-item:hover {
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+            border-left: 4px solid #667eea;
+            padding-left: calc(3rem - 4px);
+        }
+        
+        .post-list-item:last-child {
+            border-bottom: none;
+        }
+        
+        /* 게시물 제목 스타일 - 밝은 색상 */
+        .post-title {
+            margin-bottom: 0.75rem;
+        }
+        
+        .post-title a {
+            color: #e2e8f0;              /* 제목 색상 - 밝은 회색 */
+            font-size: 1.3rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .post-title a:hover {
+            color: #90cdf4;              /* 호버시 밝은 파란색 */
+            text-decoration: none;
+        }
+        
+        /* 게시물 메타 정보 스타일 */
+        .post-meta {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            font-size: 0.95rem;
+        }
+        
+        .post-author {
+            color: #90cdf4;              /* 작성자 색상 - 밝은 파란색 */
+            font-weight: 600;
+        }
+        
+        .post-author::before {
+            content: '👤 ';
+            margin-right: 0.25rem;
+        }
+        
+        .post-date {
+            color: #a0aec0;              /* 날짜 색상 - 중간 회색 */
+        }
+        
+        .post-date::before {
+            content: '📅 ';
+            margin-right: 0.25rem;
+        }
+        
+        /* 빈 상태 메시지 스타일 - 블랙 테마 */
+        .empty-message, .loading-message, .error-message {
+            padding: 3rem;
+            text-align: center;
+            font-size: 1.2rem;
+            background: #1a1a1a;
+        }
+        
+        .loading-message {
+            color: #90cdf4;
+        }
+        
+        .error-message {
+            color: #fc8181;
+        }
+        
+        .empty-message {
+            color: #a0aec0;
+        }
+        
+        /* 페이지네이션 스타일 - 블랙 테마 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 2rem 0;
+            list-style: none;
+            margin: 0;
+        }
+        
+        .pagination li a {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #90cdf4;              /* 페이지 번호 색상 - 밝은 파란색 */
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: #2d3748;
+            border: 1px solid #4a5568;
+        }
+        
+        .pagination li a:hover {
+            background: #4a5568;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(144, 205, 244, 0.3);
+        }
+        
+        .pagination li.active a {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(144, 205, 244, 0.4);
+            border-color: #90cdf4;
+        }
+        
+        /* 버튼 스타일 - 블랙 테마 */
+        .btn {
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+            color: white;
+            border: 1px solid #4a5568;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 85, 104, 0.4);
+            color: white;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* 네비게이션 바 블랙 테마 */
+        .navbar {
+            background: #1a1a1a !important;
+            border-bottom: 1px solid #2d3748;
+        }
+        
+        .nav-brand, .nav-link {
+            color: #e2e8f0 ;
+        }
+        
+        .nav-brand:hover, .nav-link:hover {
+            color: #b388ff ;
+        }
+        
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .board-header {
+                padding: 1.5rem 2rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .board-header h1 {
+                font-size: 2rem;
+            }
+            
+            .post-list-item {
+                padding: 1.25rem 2rem;
+            }
+            
+            .post-title a {
+                font-size: 1.1rem;
+            }
+            
+            .post-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="w3-content">
+    <nav class="navbar">
+        <div class="container">
+            <a href="/index.html" class="nav-brand">🧑‍💻 Noel J Project</a>
+            <div class="nav-links">
+                <a href="/board/board_list.html" class="nav-link">자유로운 SKILL 게시판</a>
+                <a href="/blog/blog_list.html" class="nav-link">SKILL SHOT</a>
+            </div>
+            <div id="auth-links" class="nav-auth"></div>
+        </div>
+    </nav>
+    <main class="container">
+        <div class ="board-container">
+            <div class="board-header">
+                <h1>SKILL BOARD</h1>
+                <a href="/board/board_post.html" class="btn btn-primary">new write</a>
+            </div>
+            <div id="board-list-body">
+                
+            </div>
+        </div>
+        <nav>
+            <ul id="pagination-ul" class="pagination"></ul>
+        </nav>
+    </main>
+    
+<script src="/assets/js/auth.js"></script>
+<script>
+    const boardListBody = document.getElementById('board-list-body');
+    const paginationUl = document.getElementById('pagination-ul');
+    const POSTS_PER_PAGE = 10;
+    const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+
+    async function fetchAndRenderBoard(page = 1) {
+        boardListBody.innerHTML = `<div style="padding: 2rem; text-align:center;">로딩 중...</div>`;
+        paginationUl.innerHTML = '';
+        try {
+            const response = await fetch(`/api/board/posts?page=${page}&size=${POSTS_PER_PAGE}`, {
+                credentials: 'include'
+            });
+                
+            if (!response.ok) throw new Error(`API 호출 실패: ${response.status}`);
+            const data = await response.json();
+            renderPosts(data.items);
+            renderPagination(data.page, data.pages);
+        } catch (error) {
+            boardListBody.innerHTML = `<div style="padding: 2rem; text-align:center; color:red;">데이터 로딩 실패</div>`;
+        }
+    }
+
+    function renderPosts(posts) {
+        boardListBody.innerHTML = '';
+        if (!posts || posts.length === 0) {
+            boardListBody.innerHTML = `<div style="padding: 2rem; text-align:center;">게시물이 없습니다.</div>`;
+            return;
+        }
+        posts.forEach(post => {
+            const formattedDate = new Date(post.created_at).toLocaleDateString('ko-KR', dateOptions);
+            const postRow = `
+                <div class="post-list-item">
+                    <div class="post-title">
+                        <a href="/board/board_view.html?id=${post.id}">${post.title}</a>
+                    </div>
+                    <div class="post-meta">
+                        <span class="post-author">${post.author_username || '알 수 없음'}</span>
+                        <span class="post-date">${formattedDate}</span>
+                    </div>
+                </div>`;
+            boardListBody.insertAdjacentHTML('beforeend', postRow);
+        });
+    }
+
+    function renderPagination(currentPage, totalPages) {
+        paginationUl.innerHTML = '';
+        if (totalPages <= 1) return;
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            if (i === currentPage) li.classList.add('active');
+            const a = document.createElement('a');
+            a.href = '#';
+            a.innerText = i;
+            a.addEventListener('click', (e) => {
+                e.preventDefault();
+                fetchAndRenderBoard(i);
+            });
+            li.appendChild(a);
+            paginationUl.appendChild(li);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        renderNavbar();
+        fetchAndRenderBoard(1);
+    });
+</script>
+</body>
+</html>

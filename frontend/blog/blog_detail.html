@@ -5,24 +5,26 @@
     <title>블로그 상세</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
     <link rel="stylesheet" href="/assets/css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>😡</text></svg>">
     <style>
         /* 이 페이지에만 적용되는 추가 스타일 */
         .post-content { white-space: pre-wrap; line-height: 1.8; }
         .image-gallery { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 1rem; }
-        .gallery-img { width: 120px; height: 120px; object-fit: cover; border-radius: 4px; }
+        .gallery-img { width: 200px; height: 200px; object-fit: cover; border-radius: 4px; }
         .w3-ul { list-style-type: none; padding: 0; margin: 0; }
         .w3-ul li { padding: 8px 16px; border-bottom: 1px solid #ddd; }
         .w3-ul li:last-child { border-bottom: none; }
     </style>
+
 </head>
 <body>
 <div class="w3-content">
     <nav class="navbar">
         <div class="container">
-            <a href="/index.html" class="nav-brand">🚀 MSA Project</a>
+            <a href="/index.html" class="nav-brand">🧑‍💻 Noel J Project</a>
             <div class="nav-links">
-                <a href="/board_list.html" class="nav-link">게시판</a>
-                <a href="/blog_list.html" class="nav-link">블로그</a>
+                <a href="/board/board_list.html" class="nav-link">자유로운 SKILL 게시판</a>
+                <a href="/blog/blog_list.html" class="nav-link">SKILL SHOT</a>
             </div>
             <div id="auth-links" class="nav-auth"></div>
         </div>
@@ -42,6 +44,8 @@
         </div>
     </main>
 </div>
+
+
 
 <script src="/assets/js/auth.js"></script>
 <script>
@@ -65,7 +69,7 @@
         if (loggedInUser && loggedInUser.id === article.owner_id) {
             actionButtons = `
                 <div style="margin-top: 1rem;">
-                    <a href="/post_form.html?type=blog&id=${article.id}" class="btn btn-primary">수정</a>
+                    <a href="/blog/post_form.html?type=blog&id=${article.id}" class="btn btn-primary">수정</a>
                     <button id="delete-btn" class="btn btn-danger">삭제</button>
                 </div>`;
         }
@@ -84,7 +88,7 @@
             </div>
             ${galleryImages ? `<div class="w3-container image-gallery">${galleryImages}</div>` : ''}
             <div class="w3-container w3-padding-large">
-                <a href="/blog_list.html" class="w3-button w3-border"><b>« 목록으로</b></a>
+                <a href="/blog/blog_list.html" class="w3-button w3-border"><b>« 목록으로</b></a>
                 ${actionButtons}
             </div>
         `;
@@ -95,7 +99,7 @@
                     const response = await fetch(`/api/blog/articles/${article.id}`, { method: 'DELETE', credentials: 'include' });
                     if (response.ok) {
                         alert('삭제되었습니다.');
-                        window.location.href = '/blog_list.html';
+                        window.location.href = '/blog/blog_list.html';
                     } else {
                         alert('삭제에 실패했습니다.');
                     }
@@ -125,7 +129,7 @@
             const posts = await response.json();
             const listItems = posts.map(post => `
                 <li class="w3-padding-16">
-                    <a href="/blog_detail.html?id=${post.id}" style="text-decoration:none; color:inherit;">
+                    <a href="/blog/blog_detail.html?id=${post.id}" style="text-decoration:none; color:inherit;">
                         <span style="font-weight:500;">${post.title}</span><br>
                         <span style="font-size:0.9em;">${post.content.substring(0, 50)}...</span>
                     </a>

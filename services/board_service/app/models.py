@@ -1,19 +1,31 @@
-from typing import Optional
-from sqlmodel import SQLModel, Field
+from typing import Optional, List
+from sqlmodel import SQLModel, Field, Relationship
+from datetime import datetime, timezone
+from sqlalchemy import Column, Integer, TEXT
 
-class BoardPost(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    title: str
-    content: str
-    owner_id: int
-    tags: Optional[str] = None
+class Post(SQLModel, table=True):
+  id: Optional[int] = Field(default=None, primary_key=True)
+  title: str = Field(index=True)
+  content: str
+  created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+  owner_id: int
+  views: int = Field(default=0)
+  #views: int = Field(default=0, sa_column=Column(Integer, nullable=False, server_default="0"))
 
-class BoardPostCreate(SQLModel):
-    title: str
-    content: str
-    tags: Optional[str] = None
+class PaginatedResponse(SQLModel):
+  total: int
+  page: int
+  size: int
+  pages: int
+  items: List[dict] = []
+  
+class PostCreate(SQLModel):
+  title: str
+  content: str
 
-class BoardPostUpdate(SQLModel):
-    title: Optional[str] = None
-    content: Optional[str] = None
-    tags: Optional[str] = None
+class PostUpdate(SQLModel):
+  title: Optional[str] = None
+  content: Optional[str] = None
+    
+    
+    
