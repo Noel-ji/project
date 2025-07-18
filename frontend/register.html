@@ -2,16 +2,55 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>회원가입</title>
+    <title>Sign up</title>
     <link rel="stylesheet" href="/assets/css/style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>😡</text></svg>">
+    <link rel="icon" href="data:,">
+    
+    <!-- 자동완성 및 비밀번호 저장 방지 -->
+    <meta name="save-password" content="never">
+    <meta name="autocomplete" content="off">
     
 <style>
+        /* 전체 배경 및 기본 색상 */
+        body {
+            background: #181824 !important;
+            color: #b388ff !important;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* 브라우저 자동완성 아이콘 완전 숨기기 */
+        input::-webkit-credentials-auto-fill-button {
+            display: none !important;
+            visibility: hidden !important;
+        }
+        
+        input::-webkit-strong-password-auto-fill-button {
+            display: none !important;
+            visibility: hidden !important;
+        }
+        
+        input::-webkit-contacts-auto-fill-button {
+            display: none !important;
+            visibility: hidden !important;
+        }
+        
+        /* 크롬 자동완성 스타일 제거 */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 1000px #1a1a1a inset !important;
+            -webkit-text-fill-color: #b388ff !important;
+            background-color: #1a1a1a !important;
+        }
+        
         .register-layout {
             display: flex;
-            min-height: calc(100vh - 80px); /* 네비바 높이 제외 */
+            min-height: calc(100vh - 80px);
             align-items: center;
             gap: 2rem;
+            padding: 2rem;
         }
         
         .left-section {
@@ -22,33 +61,87 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             padding: 3rem;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(179, 136, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 배경 애니메이션 */
+        .left-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
         }
         
         .left-content {
             text-align: center;
             color: white;
+            position: relative;
+            z-index: 1;
         }
         
-        .left-content img {
-            max-width: 400px;
-            width: 100%;
-            height: auto;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        /* 손 흔들기 애니메이션 */
+        .wave-hand {
+            font-size: 6rem;
+            display: inline-block;
+            animation: wave 2s infinite;
+            margin-bottom: 1rem;
+        }
+        
+        @keyframes wave {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(20deg); }
+            75% { transform: rotate(-20deg); }
+        }
+        
+        /* 환영 메시지 */
+        .welcome-emoji {
+            font-size: 2rem;
+            margin: 0 0.5rem;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
         }
         
         .left-content h2 {
             font-size: 2.5rem;
             margin-bottom: 1rem;
             font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            animation: glow 3s infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 2px 4px rgba(0,0,0,0.3), 0 0 20px rgba(255,255,255,0.2); }
+            to { text-shadow: 0 2px 4px rgba(0,0,0,0.3), 0 0 30px rgba(255,255,255,0.4); }
         }
         
         .left-content p {
             font-size: 1.2rem;
             opacity: 0.9;
             line-height: 1.6;
+            animation: fadeInUp 1s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 0.9; transform: translateY(0); }
         }
         
         .right-section {
@@ -59,17 +152,113 @@
         .form-container {
             max-width: 500px;
             margin: 0 auto;
-            background: #430288;
+            background: #232336;
             padding: 3rem;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(179, 136, 255, 0.2);
+            border: 1px solid #3a3a4d;
         }
         
         .form-container h1 {
             text-align: center;
             margin-bottom: 2rem;
-            color: #0cff77;
+            color: #b388ff !important;
             font-size: 2rem;
+            text-shadow: 0 2px 4px rgba(179, 136, 255, 0.3);
+        }
+        
+        /* 폼 스타일 */
+        label {
+            color: #b388ff !important;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+            font-size: 1.1rem;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #3a3a4d;
+            border-radius: 8px;
+            background: #1a1a1a !important;
+            color: #b388ff !important;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            margin-bottom: 1rem;
+            
+            /* 자동완성 완전 비활성화 */
+            autocomplete: off !important;
+            autocorrect: off !important;
+            autocapitalize: off !important;
+            spellcheck: false !important;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #b388ff;
+            box-shadow: 0 0 10px rgba(179, 136, 255, 0.3);
+            background: #232336 !important;
+        }
+        
+        /* 플레이스홀더 색상 */
+        input::placeholder, textarea::placeholder {
+            color: #6a6a7d !important;
+        }
+        
+        button {
+            width: 100%;
+            background: linear-gradient(135deg, #b388ff 0%, #7c3aed 100%);
+            color: white !important;
+            padding: 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(179, 136, 255, 0.4);
+            background: linear-gradient(135deg, #7c3aed 0%, #b388ff 100%);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* 링크 스타일 */
+        a {
+            color: #b388ff !important;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        a:hover {
+            color: white !important;
+        }
+        
+        /* 에러 메시지 */
+        #error-message {
+            color: #ff6b6b !important;
+            background: rgba(255, 107, 107, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #ff6b6b;
+            margin-bottom: 1rem;
+            text-align: center;
+            display: none;
+        }
+        
+        #error-message:not(:empty) {
+            display: block;
         }
         
         /* 반응형 디자인 */
@@ -77,10 +266,15 @@
             .register-layout {
                 flex-direction: column;
                 min-height: auto;
+                padding: 1rem;
             }
             
             .left-section {
                 padding: 2rem 1rem;
+            }
+            
+            .wave-hand {
+                font-size: 4rem;
             }
             
             .left-content h2 {
@@ -111,19 +305,18 @@
     
     <main class="container">
         <div class="register-layout">
-            <!-- 왼쪽 섹션 - 이미지 및 설명 -->
+            <!-- 왼쪽 섹션 - 환영 이미지 및 설명 -->
             <div class="left-section">
                 <div class="left-content">
-                    <!-- 여기에 원하시는 이미지를 넣으세요 -->
-                    <img src="/assets/images/welcome-image.jpg" alt="환영 이미지" 
-                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <div style="display:none; font-size: 5rem; margin-bottom: 2rem;">🚀</div>
+                    <!-- 손 흔들기 애니메이션 -->
+                    <div class="wave-hand">👋</div>
                     
-                    <h2>함께 성장해요!</h2>
+                    <h2>함께 성장해요! <span class="welcome-emoji">🚀</span></h2>
                     <p>
-                        개발자들의 지식 공유 플랫폼에 오신 것을 환영합니다.<br>
-                        자유로운 게시판과 기술 블로그를 통해<br>
-                        여러분의 경험을 나누고 함께 발전해보세요.
+                        <strong>개발자들의 지식 공유 플랫폼</strong>에 오신 것을 환영합니다!<br>
+                        <span class="welcome-emoji">💻</span> 자유로운 게시판과 기술 블로그를 통해<br>
+                        <span class="welcome-emoji">✨</span> 여러분의 경험을 나누고 함께 발전해보세요.<br>
+                        <span class="welcome-emoji">🎯</span> <strong>지금 바로 시작하세요!</strong>
                     </p>
                 </div>
             </div>
@@ -131,43 +324,72 @@
             <!-- 오른쪽 섹션 - 회원가입 폼 -->
             <div class="right-section">
                 <div class="form-container">
-                    <h1>회원가입</h1>
-                    <form id="register-form">
-                        <p id="error-message" style="color:red; text-align: center;"></p>
+                    <h1>✨ 회원가입</h1>
+                    <form id="register-form" autocomplete="off">
+                        <p id="error-message"></p>
                         
                         <div>
-                            <label for="username">사용자 이름:</label>
-                            <input type="text" id="username" name="username" required>
+                            <label for="username">👤 사용자 이름:</label>
+                            <input type="text" id="username" name="username" 
+                                   autocomplete="off" 
+                                   autocorrect="off" 
+                                   autocapitalize="off" 
+                                   spellcheck="false"
+                                   placeholder="멋진 닉네임을 입력해주세요"
+                                   required>
                         </div>
                         
                         <div>
-                            <label for="email">이메일 (로그인 ID):</label>
-                            <input type="email" id="email" name="email" required>
+                            <label for="email">📧 이메일 (로그인 ID):</label>
+                            <input type="email" id="email" name="email" 
+                                   autocomplete="off" 
+                                   autocorrect="off" 
+                                   autocapitalize="off" 
+                                   spellcheck="false"
+                                   placeholder="example@email.com"
+                                   required>
                         </div>
                         
                         <div>
-                            <label for="password">비밀번호:</label>
-                            <input type="password" id="password" name="password" required>
+                            <label for="password">🔒 비밀번호:</label>
+                            <input type="password" id="password" name="password" 
+                                   autocomplete="new-password" 
+                                   autocorrect="off" 
+                                   autocapitalize="off" 
+                                   spellcheck="false"
+                                   placeholder="안전한 비밀번호를 입력해주세요"
+                                   required>
                         </div>
                         
                         <div>
-                            <label for="password_confirm">비밀번호 확인:</label>
-                            <input type="password" id="password_confirm" name="password_confirm" required>
+                            <label for="password_confirm">🔐 비밀번호 확인:</label>
+                            <input type="password" id="password_confirm" name="password_confirm" 
+                                   autocomplete="new-password" 
+                                   autocorrect="off" 
+                                   autocapitalize="off" 
+                                   spellcheck="false"
+                                   placeholder="비밀번호를 다시 입력해주세요"
+                                   required>
                         </div>
                         
                         <div>
-                            <label for="bio">자기소개 (선택사항):</label>
-                            <textarea id="bio" name="bio" rows="3"></textarea>
+                            <label for="bio">📝 자기소개 (선택사항):</label>
+                            <textarea id="bio" name="bio" rows="3" 
+                                      autocomplete="off" 
+                                      autocorrect="off" 
+                                      autocapitalize="off" 
+                                      spellcheck="false"
+                                      placeholder="간단한 자기소개를 작성해주세요"></textarea>
                         </div>
                         
                         <div>
-                            <label for="profile_image">프로필 사진 (선택사항):</label>
+                            <label for="profile_image">📷 프로필 사진 (선택사항):</label>
                             <input type="file" id="profile_image" name="profile_image" accept="image/*">
                         </div>
                         
-                        <button type="submit" id="submit-btn">가입하기</button>
+                        <button type="submit" id="submit-btn">🚀 가입하기</button>
                         
-                        <p style="text-align: center; margin-top: 1rem; font-size: 0.9em;">
+                        <p style="text-align: center; margin-top: 1rem; font-size: 0.9em; color: #b388ff;">
                             이미 계정이 있으신가요? <a href="/login.html">로그인</a>
                         </p>
                     </form>
@@ -176,14 +398,38 @@
         </div>
     </main>
 
+    <script src="/assets/js/auth.js"></script>
     <script>
+        // 자동완성 기능 완전 비활성화
+        document.addEventListener('DOMContentLoaded', function() {
+            // 모든 input 요소에 자동완성 비활성화 속성 강제 적용
+            const inputs = document.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                input.setAttribute('autocomplete', 'off');
+                input.setAttribute('autocorrect', 'off');
+                input.setAttribute('autocapitalize', 'off');
+                input.setAttribute('spellcheck', 'false');
+                
+                // 추가적인 자동완성 방지
+                input.addEventListener('focus', function() {
+                    this.setAttribute('autocomplete', 'off');
+                });
+            });
+            
+            // 네비게이션 렌더링
+            const user = getCurrentUser();
+            renderNavbar(user);
+        });
+
         document.getElementById('register-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submit-btn');
             const errorEl = document.getElementById('error-message');
             errorEl.innerText = '';
+            
+            const originalText = submitBtn.innerText;
             submitBtn.disabled = true;
-            submitBtn.innerText = '처리 중...';
+            submitBtn.innerText = '⏳ 처리 중...';
 
             const password = document.getElementById('password').value;
             const passwordConfirm = document.getElementById('password_confirm').value;
@@ -191,9 +437,9 @@
             
             // 1. 비밀번호 확인
             if (password !== passwordConfirm) {
-                errorEl.innerText = '비밀번호가 일치하지 않습니다.';
+                errorEl.innerText = '❌ 비밀번호가 일치하지 않습니다.';
                 submitBtn.disabled = false;
-                submitBtn.innerText = '가입하기';
+                submitBtn.innerText = originalText;
                 return;
             }
 
@@ -211,7 +457,8 @@
                 const registerResponse = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(textData)
+                    body: JSON.stringify(textData),
+                    credentials: 'include'
                 });
                 
                 if (!registerResponse.ok) {
@@ -222,6 +469,8 @@
                 // 4. 프로필 사진 파일이 있으면, 이어서 이미지 업로드 요청
                 const imageFile = imageInput.files[0];
                 if (imageFile) {
+                    submitBtn.innerText = '📷 이미지 업로드 중...';
+                    
                     const imageFormData = new FormData();
                     imageFormData.append("file", imageFile);
 
@@ -232,18 +481,18 @@
                     });
 
                     if (!imageResponse.ok) {
-                        console.error('이미지 업로드에 실패했지만, 회원가입은 완료되었습니다.');
+                        console.warn('이미지 업로드에 실패했지만, 회원가입은 완료되었습니다.');
                     }
                 }
 
-                alert('회원가입이 완료되었습니다. 메인 페이지로 이동합니다.');
+                submitBtn.innerText = '✅ 완료!';
+                alert('🎉 회원가입이 완료되었습니다! 메인 페이지로 이동합니다.');
                 window.location.href = '/index.html';
 
             } catch(error) {
-                errorEl.innerText = error.message;
-            } finally {
+                errorEl.innerText = '❌ ' + error.message;
                 submitBtn.disabled = false;
-                submitBtn.innerText = '가입하기';
+                submitBtn.innerText = originalText;
             }
         });
     </script>

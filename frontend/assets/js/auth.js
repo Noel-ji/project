@@ -28,7 +28,7 @@ async function renderNavbar(user) {
 
     if (currentUser) {
         authLinks.innerHTML = `
-            <a href="/profile_edit.html" class="nav-link">프로필 수정</a>
+            <a href="/profile_edit.html" class="nav-link">프로필 EDIT</a>
             <span class="navbar-text">환영합니다, ${currentUser.username}님!</span>
             <button id="logout-btn" class="btn">로그아웃</button>`;
         
@@ -42,7 +42,7 @@ async function renderNavbar(user) {
         });
     } else {
         authLinks.innerHTML = `
-            <a href="/login.html" class="nav-link">로그인</a>
-            <a href="/register.html" class="nav-link">회원가입</a>`;
+            <a href="/login.html" class="nav-link">Sign in</a>
+            <a href="/register.html" class="nav-link">Sign up</a>`;
     }
 }
