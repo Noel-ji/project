@@ -22,6 +22,7 @@ services:
     environment:
       - USER_SERVICE_URL=http://user_service:8001
       - BLOG_SERVICE_URL=http://blog_service:8002
+      - BOARD_SERVICE_URL=http://board_service:8003
     depends_on:
       user_service: 
         condition: service_started
@@ -56,6 +57,38 @@ services:
     depends_on:
       blog_db:
         condition: service_healthy
+    networks:
+      - webnet
+  board_service:
+    build: ./services/board_service
+    volumes:
+      - ./services/board_service/app:/app
+    environment:
+      - DATABASE_URL=mysql+asyncmy://msa_user:1234567890@board_db:3306/board_db
+    depends_on:
+      board_db:
+        condition: service_healthy
+    ports:
+      - 8003:8003
+    networks:
+      - webnet
+
+  board_db:
+    image: mysql:8.0
+    ports:
+      - "33063:3306"
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_ROOT_PASSWORD=${USER_DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=board_db
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping","-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - webnet
 

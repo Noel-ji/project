@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>블로그 새글 작성</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <style>
+        body {
+            background: #f5f6fa;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .center-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+        }
+        .write-box {
+            background: #fff;
+            margin-top: 48px;
+            padding: 2.5rem 2rem 2rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .write-box h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-family: 'Raleway', sans-serif;
+            font-size: 1.7rem;
+            color: #1976d2;
+            letter-spacing: 1px;
+        }
+        .write-box label {
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            margin-top: 1.1rem;
+            color: #333;
+        }
+        .write-box input[type="text"],
+        .write-box textarea {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid #d0d0d0;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-family: inherit;
+            margin-bottom: 0.2rem;
+            background: #fafbfc;
+            transition: border 0.2s;
+        }
+        .write-box textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+        .write-box button[type="submit"] {
+            background: #1976d2;
+            color: #fff;
+            border: none;
+            padding: 0.9rem 0;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 1.7rem;
+            transition: background 0.2s;
+        }
+        .write-box button[type="submit"]:hover {
+            background: #125ea2;
+        }
+        #result {
+            margin-top: 1.2rem;
+            text-align: center;
+            font-size: 1.05rem;
+        }
+        @media (max-width: 600px) {
+            .write-box {
+                padding: 1.2rem 0.7rem 1.5rem 0.7rem;
+                max-width: 98vw;
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="container">
+        <a href="/index.html" class="nav-brand">🚀 MSA Project</a>
+        <div class="nav-links">
+            <a href="/board_list.html" class="nav-link">게시판</a>
+            <a href="/blog_list.html" class="nav-link">블로그</a>
+            <a href="/blog_write.html" class="nav-link">블로그 글쓰기</a>
+        </div>
+        <div id="auth-links" class="nav-auth"></div>
+    </div>
+</nav>
+<div class="center-container">
+    <form id="blog-form" class="write-box">
+        <h2>블로그 새글 작성</h2>
+        <label for="title">제목</label>
+        <input type="text" id="title" name="title" required>
+
+        <label for="content">내용</label>
+        <textarea id="content" name="content" rows="10" required></textarea>
+
+        <label for="tags">태그(쉼표로 구분)</label>
+        <input type="text" id="tags" name="tags">
+
+        <button type="submit">등록</button>
+        <div id="result"></div>
+    </form>
+</div>
+<script>
+document.getElementById('blog-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const title = document.getElementById('title').value;
+    const content = document.getElementById('content').value;
+    const tags = document.getElementById('tags').value;
+
+    const headers = {
+        "Content-Type": "application/json"
+    };
+    const userId = localStorage.getItem("user_id");
+    if (userId) headers["X-User-Id"] = userId;
+
+    const response = await fetch('/api/blog/articles', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ title, content, tags })
+    });
+
+    const resultDiv = document.getElementById('result');
+    if (response.ok) {
+        const data = await response.json();
+        resultDiv.innerHTML = `<p style="color:green;">글이 등록되었습니다! <a href="/blog_detail.html?id=${data.id}">바로가기</a></p>`;
+        document.getElementById('blog-form').reset();
+    } else {
+        const err = await response.json();
+        resultDiv.innerHTML = `<p style="color:red;">오류: ${err.detail || '등록 실패'}</p>`;
+    }
+});
+</script>
+</body>
+</html>

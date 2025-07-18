@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 상세</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+<div class="w3-content">
+    <nav class="navbar">
+        <div class="container">
+            <a href="/index.html" class="nav-brand">MSA Project</a>
+            <div class="nav-links">
+                <a href="/board_list.html" class="nav-link">게시판</a>
+                <a href="/blog_list.html" class="nav-link">블로그</a>
+            </div>
+            <div id="auth-links" class="nav-auth"></div>
+        </div>
+    </nav>
+    <main class="container">
+        <div class="card" id="post-detail"></div>
+        <div style="margin-top:2rem;">
+            <a href="/board_list.html" class="btn btn-secondary">목록으로</a>
+            <button id="edit-btn" class="btn btn-primary" style="display:none;">수정</button>
+            <button id="delete-btn" class="btn btn-danger" style="display:none;">삭제</button>
+        </div>
+    </main>
+</div>
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const postId = urlParams.get('id');
+const postDetail = document.getElementById('post-detail');
+const editBtn = document.getElementById('edit-btn');
+const deleteBtn = document.getElementById('delete-btn');
+let postOwnerId = null;
+
+async function fetchPost() {
+    const res = await fetch(`/api/board/posts/${postId}`);
+    if (!res.ok) {
+        postDetail.innerHTML = "<p>게시글을 불러올 수 없습니다.</p>";
+        return;
+    }
+    const post = await res.json();
+    postOwnerId = post.owner_id;
+    postDetail.innerHTML = `
+        <div class="card-header"><h2>${post.title}</h2></div>
+        <div class="card-body">${post.content}</div>
+        <div class="card-footer">태그: ${post.tags || ''} | 작성자: ${post.owner_id}</div>
+    `;
+    // 로그인한 사용자가 글쓴이일 때만 수정/삭제 버튼 표시
+    const userId = localStorage.getItem("user_id");
+    if (userId && String(userId) === String(post.owner_id)) {
+        editBtn.style.display = '';
+        deleteBtn.style.display = '';
+    }
+}
+fetchPost();
+
+editBtn.addEventListener('click', () => {
+    window.location.href = `/post_form.html?id=${postId}`;
+});
+deleteBtn.addEventListener('click', async () => {
+    if (!confirm("정말 삭제하시겠습니까?")) return;
+    const headers = {};
+    const userId = localStorage.getItem("user_id");
+    if (userId) headers["X-User-Id"] = userId;
+    const res = await fetch(`/api/board/posts/${postId}`, { method: 'DELETE', headers });
+    if (res.ok) {
+        alert("삭제되었습니다.");
+        window.location.href = '/board_list.html';
+    } else {
+        alert("삭제 실패");
+    }
+});
+</script>
+</body>
+</html>
