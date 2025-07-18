@@ -6,6 +6,70 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
     <link rel="stylesheet" href="/assets/css/style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>😡</text></svg>">
+    <style>
+        /* 헤더 스타일 수정 */
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        .header-left {
+            text-align: left;
+        }
+        
+        .header-left h1 {
+            margin: 0 0 0.5rem 0;
+            color: #b388ff !important;
+        }
+        
+        .header-left p {
+            margin: 0;
+            color: #b388ff !important;
+        }
+        
+        .header-right {
+            flex-shrink: 0;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #b388ff 0%, #7c3aed 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(179, 136, 255, 0.4);
+            background: linear-gradient(135deg, #7c3aed 0%, #b388ff 100%);
+            color: white;
+        }
+        
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .header-left {
+                text-align: center;
+            }
+        }
+    </style>
 </head>
 <body>
 <div class="w3-content">
@@ -15,21 +79,26 @@
             <div class="nav-links">
                 <a href="/board/board_list.html" class="nav-link">자유로운 SKILL 게시판</a>
                 <a href="/blog/blog_list.html" class="nav-link">SKILL SHOT</a>
-                <a href="/blog/post_form.html" class="nav-link">NEW POST</a>
-
             </div>
             <div id="auth-links" class="nav-auth"></div>
         </div>
     </nav>
 
     <header class="w3-container w3-center w3-padding-32">
-        <h1><b>MY SKILL SHOT</b></h1>
-        <p>Welcome ;) <span class="w3-tag">JJM</span></p>
+        <div class="header-content">
+            <div class="header-left">
+                <h1><b>MY SKILL SHOT</b></h1>
+                <p>Welcome ;) <span class="w3-tag">JJM</span></p>
+            </div>
+            <div class="header-right">
+                <a href="/blog/post_form.html?type=blog" class="btn btn-primary">✨ new write</a>
+            </div>
+        </div>
     </header>
 
     <main class="container">
         <div id="blog-grid-container" class="grid-container">
-            </div>
+        </div>
         <div id="loading-indicator" style="text-align: center; padding: 2rem; display: none;">
             <p>Loading more posts...</p>
         </div>
